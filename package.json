@@ -1,0 +1,14 @@
+{
+  "name": "paper-plan",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "把纸质计划照片变成可编辑、可勾选、可持久化的本地任务清单",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test"
+  }
+}
