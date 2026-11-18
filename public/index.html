@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>纸质计划 → 任务清单</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">✓</span>
+      <div>
+        <h1>纸质计划 <span class="arrow" aria-hidden="true">→</span> 任务清单</h1>
+        <p>本地 · 离线 · 单用户</p>
+      </div>
+    </div>
+    <div class="save-state" id="save-state" data-state="idle" role="status" aria-live="polite">
+      <span class="dot" aria-hidden="true"></span><span id="save-text">已保存</span>
+    </div>
+  </header>
+
+  <main class="layout">
+    <aside class="sidebar">
+      <div class="sidebar-head">
+        <h2>我的计划</h2>
+        <button class="btn btn-small" id="new-plan-btn" type="button">＋ 新建</button>
+      </div>
+      <ul class="plan-list" id="plan-list"></ul>
+      <p class="sidebar-empty" id="sidebar-empty" hidden>还没有计划。<br>从右侧上传一张照片，或手动录入。</p>
+      <div class="ocr-hint" id="ocr-hint" hidden></div>
+    </aside>
+
+    <section class="workspace">
+      <div class="welcome" id="welcome">
+        <div class="welcome-art" aria-hidden="true">
+          <div class="paper-sheet">
+            <span class="paper-title"></span>
+            <span class="paper-line"></span>
+            <span class="paper-line short"></span>
+            <span class="paper-line"></span>
+            <span class="paper-check">✓</span>
+          </div>
+        </div>
+        <h2>把纸上的计划，变成能勾选的任务</h2>
+        <p>拍下或选择一张计划照片，本地识别后自动拆成任务；也可以直接手动录入。任务可编辑、可勾选，并保存在本机。</p>
+        <div class="welcome-actions">
+          <button class="btn btn-primary" id="welcome-photo" type="button">上传计划照片</button>
+          <button class="btn" id="welcome-manual" type="button">手动录入</button>
+        </div>
+        <p class="welcome-note">离线运行，不需要账号，也不会上传任何内容到云端。</p>
+      </div>
+
+      <section class="card new-plan" id="new-plan-panel" hidden aria-label="新建计划">
+        <div class="card-head">
+          <h2>新建计划</h2>
+          <button class="icon-btn" id="close-new-panel" type="button" title="关闭" aria-label="关闭">×</button>
+        </div>
+        <div class="tabs" role="tablist">
+          <button class="tab is-active" id="tab-photo" type="button" role="tab" aria-selected="true" aria-controls="pane-photo">上传照片</button>
+          <button class="tab" id="tab-manual" type="button" role="tab" aria-selected="false" aria-controls="pane-manual">手动录入</button>
+        </div>
+
+        <div class="pane" id="pane-photo" role="tabpanel" aria-labelledby="tab-photo">
+          <label class="dropzone" id="dropzone" for="photo-input">
+            <input type="file" id="photo-input" accept="image/png,image/jpeg,image/webp,image/bmp,image/tiff,image/gif" hidden>
+            <span class="dropzone-icon" aria-hidden="true">▧</span>
+            <span class="dropzone-title" id="dropzone-title">选择或拖入一张计划照片</span>
+            <span class="dropzone-note">支持 PNG / JPEG / WebP / BMP / TIFF / GIF，最大 15 MB</span>
+          </label>
+          <div class="file-preview" id="file-preview" hidden>
+            <img id="file-thumb" alt="已选择的计划照片预览">
+            <div class="file-meta">
+              <span id="file-name"></span>
+              <span class="muted" id="file-size"></span>
+            </div>
+            <button class="btn btn-small" id="clear-file" type="button">移除</button>
+          </div>
+          <div class="pane-actions">
+            <button class="btn btn-primary" id="recognize-btn" type="button" disabled>识别文字并生成任务</button>
+            <span class="muted" id="recognize-note">使用本机 Tesseract，不联网。</span>
+          </div>
+
+          <div class="fallback" id="photo-fallback" hidden>
+            <p class="notice" id="fallback-message"></p>
+            <label class="field-label" for="fallback-text">手动录入图片里的文字（一行一条任务）</label>
+            <textarea id="fallback-text" rows="7" placeholder="例如：&#10;本周计划&#10;- [ ] 整理周报&#10;- [x] 预约牙医"></textarea>
+            <div class="pane-actions">
+              <button class="btn btn-primary" id="fallback-submit" type="button">用这段文字生成任务</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="pane" id="pane-manual" role="tabpanel" aria-labelledby="tab-manual" hidden>
+          <label class="field-label" for="manual-text">输入或粘贴计划文字（一行一条任务）</label>
+          <textarea id="manual-text" rows="8" placeholder="例如：&#10;今日待办&#10;- [ ] 回复客户邮件&#10;- [ ] 整理会议纪要&#10;- [x] 给妈妈打电话"></textarea>
+          <div class="pane-actions">
+            <button class="btn btn-primary" id="manual-submit" type="button">生成任务清单</button>
+            <span class="muted">行首的 -、1.、□、[ ] 会被自动去掉；[x] 会标记为已完成。</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="card plan-view" id="plan-view" hidden aria-label="任务清单">
+        <div class="plan-head">
+          <div>
+            <h2 id="plan-title"></h2>
+            <p class="plan-meta" id="plan-meta"></p>
+          </div>
+          <button class="btn btn-danger-ghost btn-small" id="delete-plan" type="button">删除计划</button>
+        </div>
+
+        <div class="progress-row">
+          <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progress-bar">
+            <span id="progress-fill"></span>
+          </div>
+          <span class="progress-text" id="progress-text"></span>
+        </div>
+
+        <ul class="task-list" id="task-list"></ul>
+        <p class="no-tasks" id="no-tasks" hidden>这个计划还没有任务，在下面添加一条。</p>
+
+        <form class="add-task" id="add-task-form">
+          <input type="text" id="add-task-input" maxlength="500" placeholder="添加一条任务，按 Enter 保存" autocomplete="off">
+          <button class="btn" type="submit">添加</button>
+        </form>
+      </section>
+    </section>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+  <script type="module" src="/app.js"></script>
+</body>
+</html>

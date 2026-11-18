@@ -1,0 +1,31 @@
+{
+  "source": "examples/sample-plan.png",
+  "ocrText": "examples/sample-ocr.txt",
+  "title": "本周计划 · 11月16日 周一",
+  "tasks": [
+    {
+      "text": "整理周报并发送给团队",
+      "done": false
+    },
+    {
+      "text": "采购打印纸和笔记本",
+      "done": false
+    },
+    {
+      "text": "预约周四下午的牙医",
+      "done": true
+    },
+    {
+      "text": "准备周五项目复盘材料",
+      "done": false
+    },
+    {
+      "text": "给妈妈打电话",
+      "done": false
+    },
+    {
+      "text": "阅读《深度工作》第三章",
+      "done": false
+    }
+  ]
+}
